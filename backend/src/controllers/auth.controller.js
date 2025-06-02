@@ -1,5 +1,7 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs"
+import {generateToken} from "../lib/utlis.js"
+import cloudinary from "../lib/cloudinary.js"
 
 export const signup = async(req, res) => {
   const{password,email,fullName}= req.body
@@ -50,16 +52,16 @@ export const login = async(req, res) => {
     if(!user){
      return res.status(400).json({messages:"invalid credentials"})
     }
-    const isPasswordCorrect=await bcrypt.compare(password,use.password)
+    const isPasswordCorrect=await bcrypt.compare(password,user.password)
     if(!isPasswordCorrect){
       return res.status(400).json({message:"inavlid credentials"})
     }
     generateToken(user._id,res)
     res.status(200).json({
-      _id:newUser._id,
-    fullName:newUser.fullName,
-    email:newUser.email,
-    profilePic:newUser.profilePic
+      _id:user._id,
+    fullName:user.fullName,
+    email:user.email,
+    profilePic:user.profilePic
 
     })
 
@@ -73,7 +75,7 @@ export const login = async(req, res) => {
 export const logout = (req, res) => {
   try {
     res.cookie("jwt","",{maxAge:0})
-    res.status(500).json({message:"logged out successfully"})
+    res.status(200).json({message:"logged out successfully"})
 
     
   } catch (error) {
@@ -109,7 +111,7 @@ export const updateProfile=async(req,res) => {
 
 export const checkAuth = (req,res)=>{
   try {
-    res.status(400).json(req.user)
+    res.status(200).json(req.user)
   } catch (error) {
     console.log("error in checkAuth controller", error);
     res.status(500).json({ message: "Internal server error" });
